@@ -76,11 +76,19 @@ if [ "$LOCAL" = "$REMOTE" ] && [ "$FORCE" = false ]; then
     exit 0
 fi
 
-# If we get here, there's an update - always notify even in quiet mode
+# If we get here, there's an update available
 
 # Get commit info
 COMMITS_BEHIND=$(git rev-list --count HEAD..origin/$CODITECT_BRANCH)
 LATEST_MSG=$(git log -1 --format="%s" origin/$CODITECT_BRANCH)
+
+# In quiet mode (background checks), just notify - don't auto-install
+if [ "$QUIET" = true ]; then
+    if command -v osascript &> /dev/null; then
+        osascript -e "display notification \"${COMMITS_BEHIND} update(s) available. Run: coditect-update\" with title \"CODITECT Update Available\"" 2>/dev/null || true
+    fi
+    exit 0
+fi
 
 if [ "$CHECK_ONLY" = true ]; then
     log "${YELLOW}Update available!${NC}"
