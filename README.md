@@ -63,19 +63,15 @@ CODITECT_REPO=https://github.com/your-org/coditect-fork.git curl -fsSL https://r
 ## Uninstall
 
 ```bash
-# Remove installation
-sudo rm -rf /opt/coditect
-
-# Remove user symlink
-rm ~/.coditect
-
-# Remove auto-updater
-launchctl unload ~/Library/LaunchAgents/com.coditect.updater.plist
-rm ~/Library/LaunchAgents/com.coditect.updater.plist
-
-# Remove Claude integration
-rm ~/.claude/CLAUDE.md ~/.claude/commands ~/.claude/skills ~/.claude/agents
+curl -fsSL https://raw.githubusercontent.com/halcasteel/coditect/main/uninstall.sh | bash
 ```
+
+This removes:
+- `/opt/coditect` installation
+- `~/.coditect` symlink
+- Auto-updater daemon
+- Claude Code symlinks
+- PATH entries (creates backup)
 
 ## Architecture
 
