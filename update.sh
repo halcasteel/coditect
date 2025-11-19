@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# CODITECT Auto-Updater
-# Runs daily via launchd to keep CODITECT up-to-date
+# CODITECT Updater
+# Usage: update.sh [--check|--force|--quiet]
 #
 set -e
 
@@ -9,13 +9,49 @@ INSTALL_DIR="/opt/coditect"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
 LOG_FILE="/tmp/coditect-updater.log"
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Parse arguments
+CHECK_ONLY=false
+FORCE=false
+QUIET=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --check|-c) CHECK_ONLY=true; shift ;;
+        --force|-f) FORCE=true; shift ;;
+        --quiet|-q) QUIET=true; shift ;;
+        --help|-h)
+            echo "CODITECT Updater"
+            echo ""
+            echo "Usage: update.sh [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --check, -c    Check for updates without installing"
+            echo "  --force, -f    Force update even if up-to-date"
+            echo "  --quiet, -q    Suppress output (for cron/launchd)"
+            echo "  --help, -h     Show this help"
+            exit 0
+            ;;
+        *) shift ;;
+    esac
+done
+
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+    if [ "$QUIET" = false ]; then
+        echo -e "$1"
+    fi
 }
 
 # Check if installation exists
 if [ ! -d "$INSTALL_DIR/.git" ]; then
-    log "ERROR: CODITECT not installed at $INSTALL_DIR"
+    log "${RED}ERROR: CODITECT not installed at $INSTALL_DIR${NC}"
     exit 1
 fi
 
@@ -30,14 +66,35 @@ sudo git fetch origin "$CODITECT_BRANCH" --quiet
 # Get current and latest commits
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse "origin/$CODITECT_BRANCH")
+LOCAL_SHORT=$(git rev-parse --short HEAD)
+REMOTE_SHORT=$(git rev-parse --short "origin/$CODITECT_BRANCH")
 
-if [ "$LOCAL" = "$REMOTE" ]; then
-    log "Already up-to-date"
+if [ "$LOCAL" = "$REMOTE" ] && [ "$FORCE" = false ]; then
+    if [ "$QUIET" = false ]; then
+        log "${GREEN}Already up-to-date${NC} (${LOCAL_SHORT})"
+    fi
     exit 0
 fi
 
-# Update available
-log "Update available: $LOCAL -> $REMOTE"
+# If we get here, there's an update - always notify even in quiet mode
+
+# Get commit info
+COMMITS_BEHIND=$(git rev-list --count HEAD..origin/$CODITECT_BRANCH)
+LATEST_MSG=$(git log -1 --format="%s" origin/$CODITECT_BRANCH)
+
+if [ "$CHECK_ONLY" = true ]; then
+    log "${YELLOW}Update available!${NC}"
+    log "  Current: ${LOCAL_SHORT}"
+    log "  Latest:  ${REMOTE_SHORT} (${COMMITS_BEHIND} commits behind)"
+    log "  Message: ${LATEST_MSG}"
+    log ""
+    log "Run 'coditect-update' to install update"
+    exit 0
+fi
+
+# Update available - install it
+log "${BLUE}Installing update...${NC}"
+log "  ${LOCAL_SHORT} -> ${REMOTE_SHORT} (${COMMITS_BEHIND} commits)"
 
 # Pull updates
 sudo git reset --hard "origin/$CODITECT_BRANCH"
@@ -49,11 +106,13 @@ sudo chmod -R 755 "$INSTALL_DIR"
 sudo find "$INSTALL_DIR" -type f -exec chmod 644 {} \;
 sudo find "$INSTALL_DIR" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod 755 {} \;
 
-log "Updated successfully to $(git rev-parse --short HEAD)"
+log "${GREEN}Updated successfully!${NC}"
+log "  Version: $(git rev-parse --short HEAD)"
+log "  Message: ${LATEST_MSG}"
 
-# Optional: Send notification (macOS)
+# Always send notification when updated (even in quiet mode)
 if command -v osascript &> /dev/null; then
-    osascript -e 'display notification "CODITECT has been updated to the latest version" with title "CODITECT Update"' 2>/dev/null || true
+    osascript -e "display notification \"Updated to ${REMOTE_SHORT}: ${LATEST_MSG}\" with title \"CODITECT Updated\"" 2>/dev/null || true
 fi
 
 exit 0

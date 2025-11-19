@@ -103,9 +103,12 @@ setup_path() {
     fi
 
     if [ -n "$SHELL_CONFIG" ]; then
-        PATH_EXPORT='export PATH="$HOME/.coditect/scripts:$PATH"'
+        # Add both bin (commands) and scripts (utilities) to PATH
+        PATH_EXPORT='export PATH="$HOME/.coditect/bin:$HOME/.coditect/scripts:$PATH"'
 
-        if ! grep -q "coditect/scripts" "$SHELL_CONFIG" 2>/dev/null; then
+        if ! grep -q "coditect/bin" "$SHELL_CONFIG" 2>/dev/null; then
+            # Remove old coditect PATH entries
+            grep -v "coditect" "$SHELL_CONFIG" > "${SHELL_CONFIG}.tmp" 2>/dev/null && mv "${SHELL_CONFIG}.tmp" "$SHELL_CONFIG" || true
             echo "" >> "$SHELL_CONFIG"
             echo "# CODITECT" >> "$SHELL_CONFIG"
             echo "$PATH_EXPORT" >> "$SHELL_CONFIG"
@@ -115,7 +118,7 @@ setup_path() {
         fi
     else
         log_warn "Could not find shell config. Add to your shell config:"
-        echo "  export PATH=\"\$HOME/.coditect/scripts:\$PATH\""
+        echo "  export PATH=\"\$HOME/.coditect/bin:\$HOME/.coditect/scripts:\$PATH\""
     fi
 }
 
@@ -134,14 +137,10 @@ setup_auto_updater() {
     <key>ProgramArguments</key>
     <array>
         <string>/opt/coditect/update.sh</string>
+        <string>--quiet</string>
     </array>
-    <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>9</integer>
-        <key>Minute</key>
-        <integer>0</integer>
-    </dict>
+    <key>StartInterval</key>
+    <integer>3600</integer>
     <key>StandardOutPath</key>
     <string>/tmp/coditect-updater.log</string>
     <key>StandardErrorPath</key>
@@ -153,7 +152,7 @@ PLIST
     launchctl unload "$LAUNCHD_PLIST" 2>/dev/null || true
     launchctl load "$LAUNCHD_PLIST"
 
-    log_info "Auto-updater configured (daily at 9:00 AM)"
+    log_info "Auto-updater configured (hourly checks)"
 }
 
 setup_claude_integration() {
@@ -178,13 +177,16 @@ print_success() {
     echo ""
     echo "Install location: $INSTALL_DIR"
     echo "User symlink:     $USER_LINK"
-    echo "Auto-updates:     Daily at 9:00 AM"
+    echo "Auto-updates:     Hourly (silent)"
+    echo ""
+    echo "Commands available after restart:"
+    echo "  coditect-update    Update to latest version"
+    echo "  coditect-check     Check for updates"
+    echo "  coditect-version   Show version info"
     echo ""
     echo "Next steps:"
     echo "  1. Restart terminal or: source ~/.zshrc"
     echo "  2. In any project: ln -s ~/.coditect .coditect"
-    echo ""
-    echo "Manual update: /opt/coditect/update.sh"
     echo ""
 }
 

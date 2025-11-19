@@ -1,0 +1,3 @@
+#!/bin/bash
+# Check for CODITECT updates without installing
+exec /opt/coditect/update.sh --check "$@"
