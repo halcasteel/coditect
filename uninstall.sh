@@ -20,7 +20,9 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 
 echo ""
-echo -e "${RED}CODITECT${NC} Uninstaller"
+echo -e "${RED}┌─────────────────────────────────┐${NC}"
+echo -e "${RED}│${NC}  CODITECT Uninstaller            ${RED}│${NC}"
+echo -e "${RED}└─────────────────────────────────┘${NC}"
 echo ""
 
 # Confirm

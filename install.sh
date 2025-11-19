@@ -21,8 +21,10 @@ NC='\033[0m'
 
 print_banner() {
     echo ""
-    echo -e "${BLUE}CODITECT${NC} Installer v1.0"
-    echo "AI-Powered Development Framework"
+    echo -e "${BLUE}┌─────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│${NC}  CODITECT Installer v1.0        ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  AI-Powered Development         ${BLUE}│${NC}"
+    echo -e "${BLUE}└─────────────────────────────────┘${NC}"
     echo ""
 }
 
