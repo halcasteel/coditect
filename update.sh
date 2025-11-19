@@ -7,7 +7,7 @@ set -e
 
 INSTALL_DIR="/opt/coditect"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
-CODITECT_API="${CODITECT_API:-https://api.az1.ai/v1}"
+CODITECT_API="${CODITECT_API:-https://api.az1.ai/api/v1}"
 LICENSE_FILE="$HOME/.coditect-license"
 LOG_FILE="/tmp/coditect-updater.log"
 
@@ -76,7 +76,7 @@ if [ -f "$LICENSE_FILE" ]; then
 
     # Check license with API
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-        -X POST "${CODITECT_API}/license/validate" \
+        -X POST "${CODITECT_API}/licenses/validate" \
         -H "Content-Type: application/json" \
         -d "{\"license_key\": \"${LICENSE_KEY}\", \"action\": \"update\"}" \
         2>/dev/null || echo "000")

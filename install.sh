@@ -9,7 +9,7 @@
 set -e
 
 # Configuration
-CODITECT_API="${CODITECT_API:-https://api.az1.ai/v1}"
+CODITECT_API="${CODITECT_API:-https://api.az1.ai/api/v1}"
 CODITECT_REPO="${CODITECT_REPO:-https://github.com/halcasteel/coditect-project-dot-claude.git}"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
 INSTALL_DIR="/opt/coditect"
@@ -73,7 +73,7 @@ validate_license() {
 
     # Call license validation API
     RESPONSE=$(curl -s -w "\n%{http_code}" \
-        -X POST "${CODITECT_API}/license/validate" \
+        -X POST "${CODITECT_API}/licenses/validate" \
         -H "Content-Type: application/json" \
         -d "{\"license_key\": \"${LICENSE_KEY}\", \"action\": \"install\", \"machine_id\": \"$(hostname)\"}" \
         2>/dev/null)
