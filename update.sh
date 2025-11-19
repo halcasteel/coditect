@@ -57,7 +57,7 @@ if [ "$QUIET" = false ]; then
     echo -e "${BLUE}│${NC}  AI-Powered Development Framework         ${BLUE}│${NC}"
     echo -e "${BLUE}│${NC}                                           ${BLUE}│${NC}"
     echo -e "${BLUE}│${NC}  © 2025 AZ1.AI INC. All Rights Reserved   ${BLUE}│${NC}"
-    echo -e "${BLUE}│${NC}  LICENSED VERSION 1.0 | 1@az1.ai          ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  LICENSED | 2025-11-19-v6.1 | 1@az1.ai    ${BLUE}│${NC}"
     echo -e "${BLUE}└───────────────────────────────────────────┘${NC}"
     echo ""
 fi
