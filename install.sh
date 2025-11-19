@@ -1,15 +1,20 @@
 #!/bin/bash
 #
-# CODITECT One-Click Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/halcasteel/coditect/main/install.sh | bash
+# CODITECT Licensed Installer
+# Usage: curl -fsSL https://az1.ai/install | bash
+#
+# Requires valid license key from https://az1.ai/coditect
+# 14-day trial with money-back guarantee
 #
 set -e
 
 # Configuration
+CODITECT_API="${CODITECT_API:-https://api.az1.ai/v1}"
 CODITECT_REPO="${CODITECT_REPO:-https://github.com/halcasteel/coditect-project-dot-claude.git}"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
 INSTALL_DIR="/opt/coditect"
 USER_LINK="$HOME/.coditect"
+LICENSE_FILE="$HOME/.coditect-license"
 LAUNCHD_PLIST="$HOME/Library/LaunchAgents/com.coditect.updater.plist"
 
 # Colors
@@ -35,11 +40,95 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+get_license_key() {
+    # Check if license key provided as argument or environment variable
+    if [ -n "$CODITECT_LICENSE" ]; then
+        LICENSE_KEY="$CODITECT_LICENSE"
+        return
+    fi
+
+    # Check for existing license file
+    if [ -f "$LICENSE_FILE" ]; then
+        LICENSE_KEY=$(cat "$LICENSE_FILE")
+        log_info "Using saved license key"
+        return
+    fi
+
+    # Prompt for license key
+    echo ""
+    echo -e "${YELLOW}License key required${NC}"
+    echo "Get your license at: https://az1.ai/coditect"
+    echo "14-day trial with money-back guarantee"
+    echo ""
+    read -p "Enter license key: " LICENSE_KEY
+
+    if [ -z "$LICENSE_KEY" ]; then
+        log_error "License key is required"
+        exit 1
+    fi
+}
+
+validate_license() {
+    log_info "Validating license..."
+
+    # Call license validation API
+    RESPONSE=$(curl -s -w "\n%{http_code}" \
+        -X POST "${CODITECT_API}/license/validate" \
+        -H "Content-Type: application/json" \
+        -d "{\"license_key\": \"${LICENSE_KEY}\", \"action\": \"install\", \"machine_id\": \"$(hostname)\"}" \
+        2>/dev/null)
+
+    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+    BODY=$(echo "$RESPONSE" | sed '$d')
+
+    if [ "$HTTP_CODE" = "200" ]; then
+        # Save license key for future use
+        echo "$LICENSE_KEY" > "$LICENSE_FILE"
+        chmod 600 "$LICENSE_FILE"
+
+        # Extract license info
+        LICENSE_STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+        DAYS_LEFT=$(echo "$BODY" | grep -o '"days_remaining":[0-9]*' | cut -d':' -f2)
+
+        if [ "$LICENSE_STATUS" = "trial" ]; then
+            log_info "License valid - Trial: ${DAYS_LEFT} days remaining"
+        else
+            log_info "License valid - Active subscription"
+        fi
+    elif [ "$HTTP_CODE" = "402" ]; then
+        log_error "License expired. Please renew at https://az1.ai/account"
+        exit 1
+    elif [ "$HTTP_CODE" = "401" ]; then
+        log_error "Invalid license key"
+        exit 1
+    else
+        log_warn "Could not validate license (offline mode)"
+        # Allow installation in offline mode if license file exists
+        if [ ! -f "$LICENSE_FILE" ]; then
+            log_error "License validation failed. Check your internet connection."
+            exit 1
+        fi
+    fi
+}
+
+phone_home() {
+    # Send telemetry (non-blocking)
+    curl -s -X POST "${CODITECT_API}/telemetry" \
+        -H "Content-Type: application/json" \
+        -d "{\"license_key\": \"${LICENSE_KEY}\", \"event\": \"$1\", \"version\": \"2025-11-19-v6.1\", \"os\": \"$(uname -s)\", \"machine_id\": \"$(hostname)\"}" \
+        >/dev/null 2>&1 &
+}
+
 check_dependencies() {
     log_info "Checking dependencies..."
 
     if ! command -v git &> /dev/null; then
         log_error "git is required but not installed."
+        exit 1
+    fi
+
+    if ! command -v curl &> /dev/null; then
+        log_error "curl is required but not installed."
         exit 1
     fi
 
@@ -196,11 +285,15 @@ print_success() {
 main() {
     print_banner
     check_dependencies
+    get_license_key
+    validate_license
+    phone_home "install_start"
     install_coditect
     create_user_symlink
     setup_path
     setup_auto_updater
     setup_claude_integration
+    phone_home "install_complete"
     print_success
 }
 

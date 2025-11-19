@@ -7,6 +7,8 @@ set -e
 
 INSTALL_DIR="/opt/coditect"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
+CODITECT_API="${CODITECT_API:-https://api.az1.ai/v1}"
+LICENSE_FILE="$HOME/.coditect-license"
 LOG_FILE="/tmp/coditect-updater.log"
 
 # Colors
@@ -65,6 +67,32 @@ fi
 # Check if installation exists
 if [ ! -d "$INSTALL_DIR/.git" ]; then
     log "${RED}ERROR: CODITECT not installed at $INSTALL_DIR${NC}"
+    exit 1
+fi
+
+# Validate license (skip in quiet mode if already validated today)
+if [ -f "$LICENSE_FILE" ]; then
+    LICENSE_KEY=$(cat "$LICENSE_FILE")
+
+    # Check license with API
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+        -X POST "${CODITECT_API}/license/validate" \
+        -H "Content-Type: application/json" \
+        -d "{\"license_key\": \"${LICENSE_KEY}\", \"action\": \"update\"}" \
+        2>/dev/null || echo "000")
+
+    if [ "$HTTP_CODE" = "402" ]; then
+        log "${RED}License expired. Please renew at https://az1.ai/account${NC}"
+        if command -v osascript &> /dev/null; then
+            osascript -e 'display notification "License expired. Please renew." with title "CODITECT"' 2>/dev/null || true
+        fi
+        exit 1
+    elif [ "$HTTP_CODE" = "401" ]; then
+        log "${RED}Invalid license. Please reinstall with valid license.${NC}"
+        exit 1
+    fi
+else
+    log "${RED}No license found. Please reinstall CODITECT.${NC}"
     exit 1
 fi
 
