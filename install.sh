@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-CODITECT_REPO="${CODITECT_REPO:-https://github.com/halcasteel/coditect.git}"
+CODITECT_REPO="${CODITECT_REPO:-https://github.com/halcasteel/coditect-project-dot-claude.git}"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
 INSTALL_DIR="/opt/coditect"
 USER_LINK="$HOME/.coditect"
