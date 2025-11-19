@@ -20,19 +20,10 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 print_banner() {
-    echo -e "${BLUE}"
     echo ""
-    echo "   ██████╗ ██████╗ ██████╗ ██╗████████╗███████╗ ██████╗████████╗"
-    echo "  ██╔════╝██╔═══██╗██╔══██╗██║╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝"
-    echo "  ██║     ██║   ██║██║  ██║██║   ██║   █████╗  ██║        ██║   "
-    echo "  ██║     ██║   ██║██║  ██║██║   ██║   ██╔══╝  ██║        ██║   "
-    echo "  ╚██████╗╚██████╔╝██████╔╝██║   ██║   ███████╗╚██████╗   ██║   "
-    echo "   ╚═════╝ ╚═════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝ ╚═════╝   ╚═╝   "
+    echo -e "${BLUE}CODITECT${NC} Installer v1.0"
+    echo "AI-Powered Development Framework"
     echo ""
-    echo "            AI-Powered Development Framework"
-    echo "                    Installer v1.0"
-    echo ""
-    echo -e "${NC}"
 }
 
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
