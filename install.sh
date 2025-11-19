@@ -21,10 +21,13 @@ NC='\033[0m'
 
 print_banner() {
     echo ""
-    echo -e "${BLUE}┌─────────────────────────────────┐${NC}"
-    echo -e "${BLUE}│${NC}  CODITECT Installer v1.0        ${BLUE}│${NC}"
-    echo -e "${BLUE}│${NC}  AI-Powered Development         ${BLUE}│${NC}"
-    echo -e "${BLUE}└─────────────────────────────────┘${NC}"
+    echo -e "${BLUE}┌───────────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│${NC}  CODITECT Installer v1.0                  ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  AI-Powered Development Framework         ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}                                           ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  © 2025 AZ1.AI INC. All Rights Reserved   ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  LICENSED VERSION                         ${BLUE}│${NC}"
+    echo -e "${BLUE}└───────────────────────────────────────────┘${NC}"
     echo ""
 }
 
