@@ -22,9 +22,11 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 echo ""
 echo -e "${RED}┌───────────────────────────────────────────┐${NC}"
 echo -e "${RED}│${NC}  CODITECT Uninstaller                     ${RED}│${NC}"
+echo -e "${RED}│${NC}  AI-Powered Development Framework         ${RED}│${NC}"
 echo -e "${RED}│${NC}                                           ${RED}│${NC}"
 echo -e "${RED}│${NC}  © 2025 AZ1.AI INC. All Rights Reserved   ${RED}│${NC}"
 echo -e "${RED}│${NC}  LICENSED VERSION                         ${RED}│${NC}"
+echo -e "${RED}│${NC}  Email: 1@az1.ai                          ${RED}│${NC}"
 echo -e "${RED}└───────────────────────────────────────────┘${NC}"
 echo ""
 

@@ -27,6 +27,7 @@ print_banner() {
     echo -e "${BLUE}│${NC}                                           ${BLUE}│${NC}"
     echo -e "${BLUE}│${NC}  © 2025 AZ1.AI INC. All Rights Reserved   ${BLUE}│${NC}"
     echo -e "${BLUE}│${NC}  LICENSED VERSION                         ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  Email: 1@az1.ai                          ${BLUE}│${NC}"
     echo -e "${BLUE}└───────────────────────────────────────────┘${NC}"
     echo ""
 }
