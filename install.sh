@@ -10,7 +10,7 @@ set -e
 
 # Configuration
 CODITECT_API="${CODITECT_API:-https://api.az1.ai/api/v1}"
-CODITECT_REPO="${CODITECT_REPO:-https://github.com/halcasteel/coditect-project-dot-claude.git}"
+CODITECT_REPO="${CODITECT_REPO:-https://github.com/coditect-ai/coditect-ops-distribution.git}"
 CODITECT_BRANCH="${CODITECT_BRANCH:-main}"
 INSTALL_DIR="/opt/coditect"
 USER_LINK="$HOME/.coditect"
