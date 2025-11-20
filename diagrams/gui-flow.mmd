@@ -1,0 +1,125 @@
+%% CODITECT Installer - GUI Installer Detailed Flow
+%% Detailed workflow for GUI installer (install_gui.py) with threading
+
+graph TD
+    A[User: python3 install_gui.py] --> B[Import tkinter]
+    B -->|Success| C[Create Tk root]
+    B -->|Fail| D[Error: tkinter not found]
+    D --> D1[Print installation instructions]
+    D1 --> Z1[Exit 1]
+
+    C --> E[Initialize InstallerGUI]
+    E --> F[Detect Platform & Python]
+    F --> F1[platform.system]
+    F1 --> F2[sys.version_info]
+
+    F2 --> G[Build UI Components]
+
+    subgraph UI_Components[UI Components]
+        G --> G1[Header Frame - blue bg]
+        G1 --> G2[Title: CODITECT Framework]
+        G2 --> G3[Subtitle: Cross-Platform Wizard]
+
+        G3 --> H[Info Frame - gray bg]
+        H --> H1[Platform Label]
+        H1 --> H2[Python Version Label]
+
+        H2 --> I[Progress Frame]
+        I --> I1[Progress Label]
+        I1 --> I2[Progress Bar - indeterminate]
+
+        I2 --> J[Log Frame]
+        J --> J1[Log Label]
+        J1 --> J2[ScrolledText - dark theme]
+
+        J2 --> K[Button Frame]
+        K --> K1[Install Button - blue]
+        K1 --> K2[Close Button - gray]
+    end
+
+    K2 --> L[Center Window on Screen]
+    L --> M[Show Window]
+    M --> N[Initial Log Messages]
+
+    N --> O[User: Click Install]
+    O --> P[Disable Install Button]
+    P --> Q[Start Progress Bar Animation]
+    Q --> R[Create Message Queue]
+    R --> S[Start Background Thread]
+
+    subgraph Background_Thread[Background Installation Thread]
+        S --> T1[Send: log 'Starting installation...']
+        T1 --> T2[Check Python Version]
+        T2 --> T2a{Version >= 3.8?}
+
+        T2a -->|No| T3[Send: error 'Python too old']
+        T3 --> T_END[Thread exits]
+
+        T2a -->|Yes| T4[Send: progress 'Creating venv...']
+        T4 --> T5[CrossPlatformInstaller.create_venv]
+
+        T5 -->|Success| T6[Send: log '✓ venv created']
+        T5 -->|Fail| T7[Send: error 'venv failed']
+        T7 --> T_END
+
+        T6 --> T8[Send: progress 'Installing dependencies...']
+        T8 --> T9[CrossPlatformInstaller.install_dependencies]
+
+        T9 -->|Success| T10[Send: log '✓ Dependencies installed']
+        T9 -->|Fail| T11[Send: error 'pip install failed']
+        T11 --> T_END
+
+        T10 --> T12[Verify GitPython]
+        T12 -->|Success| T13[Send: log '✓ GitPython {version}']
+        T12 -->|Fail| T14[Send: log '⚠ GitPython missing']
+
+        T13 --> T15[Send: success 'Installation complete!']
+        T14 --> T15
+        T15 --> T_END
+    end
+
+    subgraph Main_Thread[Main Thread - UI Updates]
+        S --> U[Start Queue Polling - 100ms]
+        U --> V{Check Queue}
+
+        V -->|Empty| V1[Wait 100ms]
+        V1 --> V
+
+        V -->|Message| W{Message Type?}
+
+        W -->|log| X1[Append to ScrolledText]
+        X1 --> X2[Scroll to end]
+        X2 --> V
+
+        W -->|progress| Y1[Update Progress Label]
+        Y1 --> V
+
+        W -->|success| Z1_SUCCESS[Stop Progress Bar]
+        Z1_SUCCESS --> Z2[Set progress to 100%]
+        Z2 --> Z3[Update label: 'Installation complete!']
+        Z3 --> Z4[Show Success Dialog]
+        Z4 --> Z5[Append next steps to log]
+        Z5 --> Z6[Change button: 'Reinstall']
+        Z6 --> Z7[Enable Reinstall button]
+        Z7 --> AA[Wait for user]
+
+        W -->|error| E1[Stop Progress Bar]
+        E1 --> E2[Update label: 'Installation failed']
+        E2 --> E3[Append error to log]
+        E3 --> E4[Show Error Dialog]
+        E4 --> E5[Re-enable Install button]
+        E5 --> AA
+    end
+
+    AA --> AB{User Action?}
+    AB -->|Reinstall| O
+    AB -->|Close| AC[root.destroy]
+    AC --> Z_SUCCESS[Exit 0]
+
+    style A fill:#2563eb,color:#fff
+    style Z_SUCCESS fill:#10b981,color:#fff
+    style Z1 fill:#ef4444,color:#fff
+    style T3 fill:#ef4444,color:#fff
+    style T7 fill:#ef4444,color:#fff
+    style T11 fill:#ef4444,color:#fff
+    style T14 fill:#fbbf24,color:#000

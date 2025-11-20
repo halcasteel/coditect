@@ -1,0 +1,100 @@
+%% CODITECT Installer - CLI Installer Detailed Flow
+%% Detailed workflow for command-line installer (install.py)
+
+graph TD
+    A[User: python3 install.py] --> B[Parse Arguments]
+    B --> C{--venv-only?}
+    B --> D{--deps-only?}
+    B --> E{--help?}
+
+    E -->|Yes| F[Show Help]
+    F --> Z1[Exit 0]
+
+    C -->|Yes| G[venv_only=True]
+    C -->|No| H[venv_only=False]
+
+    D -->|Yes| I[deps_only=True]
+    D -->|No| J[deps_only=False]
+
+    G --> K[Validate Arguments]
+    H --> K
+    I --> K
+    J --> K
+
+    K -->|venv_only AND deps_only| L[Error: Conflicting flags]
+    L --> Z2[Exit 1]
+
+    K -->|Valid| M[Initialize CrossPlatformInstaller]
+
+    M --> N[Detect Platform]
+    N --> N1[platform.system]
+    N1 --> N2{OS Type?}
+    N2 -->|Windows| O1[os_type = Windows]
+    N2 -->|Darwin| O2[os_type = Darwin]
+    N2 -->|Linux| O3[os_type = Linux]
+
+    O1 --> P[Print Header]
+    O2 --> P
+    O3 --> P
+
+    P --> Q[Check Python Version]
+    Q --> Q1[sys.version_info]
+    Q1 --> Q2{Version >= 3.8?}
+
+    Q2 -->|No| R[Error: Python 3.8+ required]
+    R --> Z2
+
+    Q2 -->|Yes| S{deps_only?}
+
+    S -->|Yes| T[Skip venv creation]
+    T --> U[Check venv exists]
+    U -->|No| V[Error: venv not found]
+    V --> Z2
+    U -->|Yes| W[Activate venv]
+
+    S -->|No| X[Create venv]
+    X --> X1{venv exists?}
+    X1 -->|No| X2[python3 -m venv venv]
+    X1 -->|Yes| X3{Recreate?}
+    X3 -->|Yes| X4[rm -rf venv]
+    X4 --> X2
+    X3 -->|No| W
+
+    X2 --> X5[Print: venv created]
+    X5 --> W
+
+    W --> Y{venv_only?}
+    Y -->|Yes| AA[Print next steps]
+    AA --> Z1
+
+    Y -->|No| AB[Install Dependencies]
+    AB --> AB1[Upgrade pip]
+    AB1 --> AB2[pip install --upgrade pip]
+    AB2 --> AB3[pip install -r requirements.txt]
+
+    AB3 -->|Success| AC[Verify GitPython]
+    AB3 -->|Fail| AD[Error: pip install failed]
+    AD --> AE[Print recovery instructions]
+    AE --> Z2
+
+    AC --> AC1[python -c 'import git']
+    AC1 -->|Success| AF[Print: GitPython {version} installed]
+    AC1 -->|Fail| AG[Warning: GitPython missing]
+
+    AF --> AH[Print Success Summary]
+    AG --> AH
+
+    AH --> AI[Print Next Steps]
+    AI --> AI1[Print: Activate venv]
+    AI1 --> AI2[Print: Run tests]
+    AI2 --> AI3[Print: Deactivate]
+
+    AI3 --> Z1
+
+    style A fill:#2563eb,color:#fff
+    style Z1 fill:#10b981,color:#fff
+    style Z2 fill:#ef4444,color:#fff
+    style R fill:#ef4444,color:#fff
+    style V fill:#ef4444,color:#fff
+    style AD fill:#ef4444,color:#fff
+    style AG fill:#fbbf24,color:#000

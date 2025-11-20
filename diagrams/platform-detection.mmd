@@ -1,0 +1,73 @@
+%% Platform Detection and Path Resolution
+%% Shows how installer handles platform-specific differences
+
+graph TD
+    A[CrossPlatformInstaller.__init__] --> B[Detect Platform]
+    B --> C[platform.system]
+
+    C --> D{OS?}
+    D -->|Windows| E[os_type = 'Windows']
+    D -->|Darwin| F[os_type = 'Darwin']
+    D -->|Linux| G[os_type = 'Linux']
+
+    E --> H[Platform-Specific Configuration]
+    F --> H
+    G --> H
+
+    subgraph Windows_Paths[Windows Configuration]
+        E --> E1[Python exe: 'python']
+        E1 --> E2[Venv activate: venv\Scripts\activate.bat]
+        E2 --> E3[Venv Python: venv\Scripts\python.exe]
+        E3 --> E4[Venv Pip: venv\Scripts\pip.exe]
+        E4 --> E5[Path separator: backslash handled by pathlib]
+        E5 --> E6[Disable ANSI colors if no ANSICON]
+    end
+
+    subgraph Unix_Paths[Unix/Linux/macOS Configuration]
+        F --> F1[Python exe: 'python3']
+        F1 --> F2[Venv activate: source venv/bin/activate]
+        F2 --> F3[Venv Python: venv/bin/python]
+        F3 --> F4[Venv Pip: venv/bin/pip]
+        F4 --> F5[Path separator: forward slash]
+        F5 --> F6[ANSI colors enabled]
+
+        G --> F1
+    end
+
+    E6 --> I[Helper Methods Available]
+    F6 --> I
+
+    subgraph Helper_Methods[Platform Abstraction Helper Methods]
+        I --> J1[get_python_executable]
+        J1 --> J1a{Windows?}
+        J1a -->|Yes| J1b[Return 'python']
+        J1a -->|No| J1c[Return 'python3']
+
+        I --> J2[get_venv_activation_command]
+        J2 --> J2a{Windows?}
+        J2a -->|Yes| J2b[Return 'venv\Scripts\activate.bat']
+        J2a -->|No| J2c[Return 'source venv/bin/activate']
+
+        I --> J3[get_venv_python]
+        J3 --> J3a{Windows?}
+        J3a -->|Yes| J3b[Return venv/Scripts/python.exe]
+        J3a -->|No| J3c[Return venv/bin/python]
+
+        I --> J4[get_venv_pip]
+        J4 --> J4a{Windows?}
+        J4a -->|Yes| J4b[Return venv/Scripts/pip.exe]
+        J4a -->|No| J4c[Return venv/bin/pip]
+    end
+
+    J1b --> K[Installation Proceeds]
+    J1c --> K
+    J2b --> K
+    J2c --> K
+    J3b --> K
+    J3c --> K
+    J4b --> K
+    J4c --> K
+
+    style E fill:#0078d4,color:#fff
+    style F fill:#000,color:#fff
+    style G fill:#f6c000,color:#000

@@ -1,0 +1,62 @@
+%% CODITECT Installer - High-Level Flow
+%% This diagram shows the complete installation workflow from user launch to completion
+
+graph TD
+    A[User launches installer] --> B{Entry point?}
+    B -->|launch.py| C{Auto-detect mode}
+    B -->|install_gui.py| D[GUI Installer]
+    B -->|install.py| E[CLI Installer]
+    B -->|install.sh| F[Bash Installer]
+
+    C -->|tkinter available| D
+    C -->|tkinter missing| E
+
+    D --> G[Initialize GUI Window]
+    G --> H[Display Platform Info]
+    H --> I[User clicks Install]
+    I --> J[Start Background Thread]
+
+    E --> K[Print Header]
+    K --> L[Check Python Version]
+
+    F --> L
+
+    J --> L
+
+    L -->|Python < 3.8| M[Error: Python too old]
+    L -->|Python >= 3.8| N[Create Virtual Environment]
+
+    M --> Z[Exit with error]
+
+    N -->|venv exists| O{Recreate?}
+    N -->|venv missing| P[Create new venv]
+
+    O -->|Yes| Q[Remove old venv]
+    O -->|No| R[Use existing venv]
+
+    Q --> P
+    R --> S[Upgrade pip]
+    P --> S
+
+    S --> T[Install requirements.txt]
+    T --> U[Verify GitPython]
+
+    U -->|Success| V[Installation Complete]
+    U -->|Missing| W[Warning: GitPython missing]
+
+    V --> X[Show Next Steps]
+    W --> X
+
+    X -->|GUI| Y1[Show Success Dialog]
+    X -->|CLI| Y2[Print Next Steps]
+
+    Y1 --> AA[User: Activate venv]
+    Y2 --> AA
+
+    AA --> AB[User: Run tests]
+    AB --> AC[User: Start development]
+
+    style A fill:#2563eb,color:#fff
+    style V fill:#10b981,color:#fff
+    style M fill:#ef4444,color:#fff
+    style Z fill:#ef4444,color:#fff
