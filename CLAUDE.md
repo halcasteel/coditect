@@ -9,13 +9,13 @@ This repository hosts the **installer and updater** for the CODITECT AI-Powered 
 This is the **distribution layer**, not the content layer:
 
 - **This repo** (`coditect-ai/coditect-ops-distribution`): Installer scripts, auto-updater, documentation
-- **Content repo** (`coditect-ai/coditect-core-dotclaude`): Agents, commands, skills, scripts
+- **Content repo** (`coditect-ai/coditect-core`): Agents, commands, skills, scripts
 
 ## Scripts
 
 ### install.sh
 One-click installer that:
-1. Clones `coditect-core-dotclaude` to `/opt/coditect`
+1. Clones `coditect-core` to `/opt/coditect`
 2. Sets read-only permissions (users can't modify)
 3. Creates `~/.coditect` symlink for user access
 4. Adds scripts to PATH
@@ -25,7 +25,7 @@ One-click installer that:
 ### update.sh
 Auto-updater that:
 1. Runs daily at 9:00 AM via launchd
-2. Pulls latest from `coditect-core-dotclaude`
+2. Pulls latest from `coditect-core`
 3. Resets permissions
 4. Sends macOS notification on update
 
@@ -53,7 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/coditect-ai/coditect-ops-distributi
 
 ```
 End User Machine:
-├── /opt/coditect/          # Read-only installation (coditect-core-dotclaude)
+├── /opt/coditect/          # Read-only installation (coditect-core)
 │   ├── agents/             # 46 AI agents
 │   ├── commands/           # 72 slash commands
 │   ├── skills/             # 189 skills
@@ -73,9 +73,9 @@ End User Machine:
 
 ### Pushing Updates
 
-Updates to `coditect-core-dotclaude` automatically propagate to all users:
+Updates to `coditect-core` automatically propagate to all users:
 
-1. Make changes in `coditect-core-dotclaude`
+1. Make changes in `coditect-core`
 2. Commit and push to main branch
 3. Users receive update at next daily check (9:00 AM)
 
@@ -106,7 +106,7 @@ CODITECT_BRANCH=v1.0.0 curl -fsSL https://raw.githubusercontent.com/coditect-ai/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CODITECT_REPO` | `coditect-ai/coditect-core-dotclaude` | Source repository |
+| `CODITECT_REPO` | `coditect-ai/coditect-core` | Source repository |
 | `CODITECT_BRANCH` | `main` | Branch to install |
 
 ## Maintenance
@@ -132,7 +132,7 @@ cat /tmp/coditect-updater.log
 
 ## Related Repositories
 
-- **coditect-core-dotclaude**: Main content (agents, commands, skills)
+- **coditect-core**: Main content (agents, commands, skills)
 - **coditect-rollout-master**: Master orchestration repository
 
 ---
